@@ -1,0 +1,41 @@
+{
+	"textures": [
+		{
+			"image": "gift_0.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 24,
+				"h": 25
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "gift.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 22,
+						"h": 23
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 22,
+						"h": 23
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 22,
+						"h": 23
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:dd5b27a2981163d930a88fd15680ab73:0913e4028ac9bdaa0cea6e11db04b51b:9f3cdfd2e9c60aced02d20ebd492bba2$"
+	}
+}

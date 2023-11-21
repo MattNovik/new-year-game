@@ -16,6 +16,29 @@ const createLizardAnims = (anims: Phaser.Animations.AnimationManager) => {
 	})
 }
 
+const createSlimeAnims = (anims: Phaser.Animations.AnimationManager) => {
+	anims.create({
+		key: 'slime-idle',
+		frames: anims.generateFrameNames('slime', { start: 0, end: 3, prefix: 'idle_', suffix: '.png' }),
+		repeat: -1,
+		frameRate: 10
+	});
+
+	anims.create({
+		key: 'slime-run',
+		frames: anims.generateFrameNames('slime', { start: 0, end: 3, prefix: 'run_', suffix: '.png' }),
+		repeat: -1,
+		frameRate: 10
+	})
+};
+
+const removeSlimeAnims = (anims: Phaser.Animations.AnimationManager) => {
+	anims.remove('slime-idle');
+	anims.remove('slime-run');
+};
+
+
 export {
-	createLizardAnims
+	createLizardAnims,
+	createSlimeAnims, removeSlimeAnims
 }

@@ -6,17 +6,21 @@ import GameUI from './scenes/GameUI'
 
 export default new Phaser.Game({
 	type: Phaser.AUTO,
-	width: 400,
+	width: 800,
 	height: 250,
 	physics: {
 		default: 'arcade',
 		arcade: {
 			gravity: { y: 0 },
-			debug: false
+			debug: true
 		}
 	},
 	scene: [Preloader, Game, GameUI],
 	scale: {
-		zoom: 2
-	}
+		mode: Phaser.Scale.FIT,
+		parent: 'phaser-example',
+		autoCenter: Phaser.Scale.CENTER_BOTH,
+		width: 800,
+		height: 600
+	},
 })

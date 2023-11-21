@@ -13,6 +13,11 @@ const createChestAnims = (anims: Phaser.Animations.AnimationManager) => {
 	})
 }
 
+const removeChestAnims = (anims: Phaser.Animations.AnimationManager) => {
+	anims.remove('chest-open');
+	anims.remove('chest-closed');
+};
+
 export {
-	createChestAnims
+	createChestAnims, removeChestAnims
 }
