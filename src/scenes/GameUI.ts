@@ -32,8 +32,9 @@ export default class GameUI extends Phaser.Scene {
 
 		levelLabel.setDepth(1);
 
-		sceneEvents.on('player-level-changed', () => {
-			levelLabel.text = `Уровень ${++this.level}`
+		sceneEvents.on('player-level-changed', (restart: boolean) => {
+			this.level = restart ? 1 : ++this.level;
+			levelLabel.text = `Уровень ${this.level}`
 		});
 
 		const giftImage = this.add.image(12, 60, 'gift', 'gift.png');
@@ -46,12 +47,14 @@ export default class GameUI extends Phaser.Scene {
 
 		giftsLabel.setDepth(1);
 
-		sceneEvents.on('player-gift-changed', () => {
-			giftsLabel.text = `${++this.gifts}`
+		sceneEvents.on('player-gift-changed', (restart: boolean) => {
+			this.gifts = restart ? 0 : ++this.gifts;
+			giftsLabel.text = `${this.gifts}`
 		});
 
 		sceneEvents.on('player-coins-changed', (coins: number) => {
-			coinsLabel.text = (this.coins + coins).toLocaleString()
+			this.coins = coins === -1 ? 0 : this.coins + coins;
+			coinsLabel.text = this.coins.toLocaleString();
 		})
 
 		sceneEvents.on('player-finished-game', () => {

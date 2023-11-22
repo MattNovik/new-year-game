@@ -6,6 +6,7 @@ export default class Preloader extends Phaser.Scene {
 	}
 
 	preload() {
+		this.load.image('joystickImg', 'Others/joystick.png');
 		this.load.image('tiles', 'tiles/ice_tileset.png');
 		this.load.image('tilesTrees', 'tiles/tree.png');
 		this.load.image('tilesStones', 'tiles/stone.png');
@@ -25,9 +26,16 @@ export default class Preloader extends Phaser.Scene {
 		this.load.image('pauseButton', 'Others/pause_button.png');
 		this.load.image('startButton', 'Others/start_button.png');
 		this.load.image('quitButton', 'Others/quit_button.png');
+		this.load.image('background', 'bg/7976081_resized.jpg');
+		this.load.plugin('rexvirtualjoystickplugin', 'plugins/rexvirtualjoystickplugin.min.js', true)
 	}
 
 	create() {
-		this.scene.start('game');
+		if (this.scale.orientation.toString() == "landscape-primary") {
+			this.scene.start('menu');
+		} else {
+			//handle your portrait case
+		}
+
 	}
 }

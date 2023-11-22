@@ -32,8 +32,14 @@ export default class Game extends Phaser.Scene {
 	private playerSlimeCollider?: Phaser.Physics.Arcade.Collider
 	private playerGiftCollider?: Phaser.Physics.Arcade.Collider
 
+	private movementJoyStick: any;
+	private shootJoyStick: any;
+
 	constructor() {
-		super('game')
+		super('game');
+
+		this.gameContainer = document.getElementById('phaser-id');
+		this.eventEmitter = new Phaser.Events.EventEmitter();
 	}
 
 	preload() {
@@ -55,6 +61,9 @@ export default class Game extends Phaser.Scene {
 		removeSlimeAnims(this.anims);
 
 		this.physics.world.colliders.destroy();
+
+		this.movementJoyStick.destroy();
+		this.shootJoyStick.destroy();
 		this.slimes.destroy(true);
 		this.snowBalls.destroy(true);
 		this.gifts.destroy(true);
@@ -68,6 +77,50 @@ export default class Game extends Phaser.Scene {
 		createHeroAnims(this.anims);
 		createSlimeAnims(this.anims);
 		createChestAnims(this.anims);
+
+		// Create movement joystick
+		this.movementJoyStick = this.plugins.get('rexvirtualjoystickplugin').add(this.scene, {
+			x: 100,
+			y: this.cameras.main.height - 125,
+			radius: 40,
+			forceMin: 0,
+			base: this.add.circle(0, 0, 60, 0x888888).setDepth(100).setAlpha(0.25),
+			thumb: this.add.image(0, 0, 'joystickImg').setDisplaySize(80, 80).setDepth(100).setAlpha(0.5),
+		}).on('update', () => { }, this);
+
+		// Create shooting joystick
+		this.shootJoyStick = this.plugins.get('rexvirtualjoystickplugin').add(this.scene, {
+			x: this.cameras.main.width - 100,
+			y: this.cameras.main.height - 125,
+			radius: 20,
+			forceMin: 0,
+			base: this.add.circle(0, 0, 60, 0x888888, 0.5).setDepth(100).setAlpha(0.25),
+			thumb: this.add.image(0, 0, 'joystickImg').setDisplaySize(80, 80).setDepth(100).setAlpha(0.5),
+		}).on('update', () => { }, this);
+
+		// Move joysticks dynamically based on pointer-down
+		this.input.on('pointerdown', (pointer) => {
+			if (pointer.x <= this.cameras.main.width * 0.4 && this.movementJoyStick.base) {
+				this.movementJoyStick.base.setPosition(pointer.x, pointer.y).setAlpha(0.5)
+				this.movementJoyStick.thumb.setPosition(pointer.x, pointer.y).setAlpha(1)
+			}
+			if (pointer.x >= this.cameras.main.width * 0.6 && this.shootJoyStick.base) {
+				this.shootJoyStick.base.setPosition(pointer.x, pointer.y).setAlpha(0.5)
+				this.shootJoyStick.thumb.setPosition(pointer.x, pointer.y).setAlpha(1)
+			}
+		});
+
+		// Add transparency to joysticks on pointer-up
+		this.input.on('pointerup', (pointer) => {
+				if (this.movementJoyStick.base && !this.movementJoyStick.force) {
+					this.movementJoyStick.base.setAlpha(0.25)
+					this.movementJoyStick.thumb.setAlpha(0.5)
+				}
+				if (this.shootJoyStick.base && !this.shootJoyStick.force) {
+					this.shootJoyStick.base.setAlpha(0.25)
+					this.shootJoyStick.thumb.setAlpha(0.5)
+				}
+		});
 
 		this.map = this.add.tilemap(key);
 		const tileset: any = this.map.addTilesetImage('dungeon', 'tiles', 16, 16);
@@ -152,8 +205,6 @@ export default class Game extends Phaser.Scene {
 	create() {
 		this.scene.run('game-ui');
 		this.loadLevel('dungeon');
-
-		this.scale.startFullscreen();
 	}
 
 	private handlePlayerChestCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
@@ -174,9 +225,9 @@ export default class Game extends Phaser.Scene {
 	};
 
 	private handlePlayerGiftCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
+		sceneEvents.emit('player-gift-changed');
 		if (!this.finalLevel) {
 			sceneEvents.emit('player-level-changed');
-			sceneEvents.emit('player-gift-changed');
 			this.destroyLevel(undefined, undefined, undefined);
 			let gameOverText = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'Загрузка уровня', { fontSize: '32px', color: '#fff', fontStyle: '700' }).setOrigin(0.5);
 			setTimeout(() => {
@@ -205,7 +256,7 @@ export default class Game extends Phaser.Scene {
 
 		if (this.hero.health <= 0) {
 			this.playerSlimeCollider?.destroy();
-			let rt = this.add.renderTexture(0, 0, window.screen.width, this.game.scale.canvas.offsetHeight + 500);
+			let rt = this.add.renderTexture(0, 0, this.cameras.main.width * 2, this.cameras.main.width * 2);
 			rt.fill(0x000000, 0.5);
 			let gameOverText = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'GAME OVER', { fontSize: '32px', color: 'red', fontStyle: '700' }).setOrigin(0.5);
 			// Then later in one of your scenes, create a new button:
@@ -232,27 +283,78 @@ export default class Game extends Phaser.Scene {
 
 	finishedGame() {
 		sceneEvents.emit('player-finished-game');
+
 		const buttonRestart = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2 - 60, this.cameras.main.worldView.y + this.cameras.main.height / 2 - 70, 'Ещё раз',)
 			.setOrigin(0.5)
 			.setPadding(10)
 			.setStyle({ backgroundColor: '#111' })
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('player-gift-changed', true);
+				sceneEvents.emit('player-level-changed', true);
+				sceneEvents.emit('player-coins-changed', -1);
+				sceneEvents.emit('player-finished-game');
+				this.finalLevel = false;
 				this.scene.restart();
-			})
+			});
+
 		const buttonSendFinaldata = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2 + 60, this.cameras.main.worldView.y + this.cameras.main.height / 2 - 70, 'Отправить',)
 			.setOrigin(0.5)
 			.setPadding(10)
 			.setStyle({ backgroundColor: '#111' })
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('player-gift-changed', true);
+				sceneEvents.emit('player-level-changed', true);
+				sceneEvents.emit('player-coins-changed', -1);
+				sceneEvents.emit('player-finished-game');
+				this.finalLevel = false;
 				console.log('sendData');
-			})
+			});
 	}
 
 	update(t: number, dt: number) {
 		if (this.hero) {
-			this.hero.update(this.cursors);
-		}
+			/* 			if (this.sys.game.device.os.desktop) {
+							this.hero.update(this.cursors, undefined);
+						} else { */
+				this.hero.update(undefined, this.movementJoyStick);
+			/* 			} */
+
+		};
 	}
+
+	resizeGameContainer() {
+		let winW = window.innerWidth / window.devicePixelRatio;
+		let winH = window.innerHeight / window.devicePixelRatio;
+		let breakpoints = [{ scrW: 0, gamW: 400 }, { scrW: 600, gamW: 450 }, { scrW: 900, gamW: 550 }, { scrW: 1200, gamW: 750 }, { scrW: 1500, gamW: 1000 }, { scrW: 1800, gamW: 1300 }];
+		let currentBreakpoint = null;
+		let newViewPortW = 0;
+		let newViewPortH = 0;
+
+		for (let i = 0; i < breakpoints.length; i++) {
+			currentBreakpoint = breakpoints[i];
+
+			if (winW < currentBreakpoint.scrW) {
+				break;
+			}
+		}
+
+		newViewPortW = currentBreakpoint.gamW;
+		newViewPortH = currentBreakpoint.gamW * (winH / winW);
+
+		this.game.scale.resize(newViewPortW, newViewPortH);
+
+		this.gameContainer.style.width = `${window.innerWidth}px`;
+		this.gameContainer.style.height = `${window.innerHeight}px`;
+		this.game.canvas.style.width = `${window.innerWidth}px`;
+		this.game.canvas.style.height = `${window.innerHeight}px`;
+
+		this.eventEmitter.emit('screenResized');
+	}
+
+	createEventListeners() {
+		this.eventEmitter.on('screenResized', () => { this.onScreenResize(); });
+	}
+
 }

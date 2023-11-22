@@ -118,6 +118,7 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
     snowBall.setVelocity(vec.x * 300, vec.y * 300);
   }
 
+
   preUpdate(t: number, dt: number) {
 
     super.preUpdate(t, dt);
@@ -136,63 +137,77 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, movementJoyStick: any) {
 
     if (this.healthState === HealthState.DAMAGE || this.healthState === HealthState.DEAD) {
       return;
     }
-    if (!cursors) {
 
-      return;
-    }
+    if (movementJoyStick.base) {
+      if (movementJoyStick?.force) {
+        // Calculate speed based on joystick force
+        let speedMultiplier = (movementJoyStick.force < movementJoyStick.radius) ? movementJoyStick.force / movementJoyStick.radius : 1
+        let speed = 100 * speedMultiplier;
 
-    if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
-      if (this.activeChest) {
-        const coins = this.activeChest.open();
-        this._coins += coins;
-
-        sceneEvents.emit('player-coins-changed', this._coins)
+        // Move player according to movement joystick
+        this.setVelocityX(speed * Math.cos(Math.PI * movementJoyStick.angle / 180))
+        this.setVelocityY(speed * Math.sin(Math.PI * movementJoyStick.angle / 180))
       } else {
-        this.throwSnowBall();
+        // Stop moving
+        this.setVelocityX(0)
+        this.setVelocityY(0)
+      };
+    } else {
+      if (!cursors) {
+        return;
       }
 
-      return;
-    }
+      if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+        if (this.activeChest) {
+          const coins = this.activeChest.open();
+          this._coins += coins;
 
-    const speed = 100;
-
-    const leftDown = cursors.left?.isDown;
-    const rightDown = cursors.right?.isDown;
-    const upDown = cursors.up?.isDown;
-    const downDown = cursors.down?.isDown;
-
-    if (this.anims && this.anims.currentAnim) {
-      if (leftDown) {
-        this.anims.play('hero-run-left', true);
-        this.setVelocity(-speed, 0);
-      } else if (rightDown) {
-        this.anims.play('hero-run-right', true);
-        this.setVelocity(speed, 0);
-      } else if (upDown) {
-        this.anims.play('hero-run-up', true);
-        this.setVelocity(0, -speed);
-      } else if (downDown) {
-        this.anims.play('hero-run-bottom', true);
-        this.setVelocity(0, speed);
-      } else {
-        const parts = this.anims.currentAnim.key.split('-');
-        if (parts) {
-          parts[1] = 'idle'
-          this.anims.play(parts.join('-'));
-          this.setVelocity(0, 0)
+          sceneEvents.emit('player-coins-changed', this._coins)
+        } else {
+          this.throwSnowBall();
         }
+
+        return;
       }
 
-    }
+      const speed = 100;
 
+      const leftDown = cursors.left?.isDown;
+      const rightDown = cursors.right?.isDown;
+      const upDown = cursors.up?.isDown;
+      const downDown = cursors.down?.isDown;
 
-    if (leftDown || rightDown || upDown || downDown) {
-      this.activeChest = undefined;
+      if (this.anims && this.anims.currentAnim) {
+        if (leftDown) {
+          this.anims.play('hero-run-left', true);
+          this.setVelocity(-speed, 0);
+        } else if (rightDown) {
+          this.anims.play('hero-run-right', true);
+          this.setVelocity(speed, 0);
+        } else if (upDown) {
+          this.anims.play('hero-run-up', true);
+          this.setVelocity(0, -speed);
+        } else if (downDown) {
+          this.anims.play('hero-run-bottom', true);
+          this.setVelocity(0, speed);
+        } else {
+          const parts = this.anims.currentAnim.key.split('-');
+          if (parts) {
+            parts[1] = 'idle'
+            this.anims.play(parts.join('-'));
+            this.setVelocity(0, 0)
+          }
+        }
+
+      }
+      if (leftDown || rightDown || upDown || downDown) {
+        this.activeChest = undefined;
+      }
     }
   }
 }

@@ -24,7 +24,8 @@
 		"typescript": "^3.8.3"
 	},
 	"dependencies": {
-		"phaser": "^3.22.0"
+		"phaser": "^3.70.0",
+		"phaser-plugin-debug-game-scale": "^3.3.0"
 	},
 	"parcelCleanPaths": [
 		"dist"
