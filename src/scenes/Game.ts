@@ -20,10 +20,9 @@ export default class Game extends Phaser.Scene {
 	private map: any
 	private hero!: Hero
 
-	private pauseState = false;
+	private finalLevel = false;
 
 	private chests: any
-	private slime!: Phaser.Physics.Arcade.Sprite
 
 	private slimes!: Phaser.Physics.Arcade.Group
 	private gifts!: any
@@ -41,12 +40,15 @@ export default class Game extends Phaser.Scene {
 		this.cursors = this.input.keyboard.createCursorKeys();
 	}
 
-	public destroyLevel(gameOverText, button) {
+	public destroyLevel(gameOverText: any, buttonAgain: any, buttonQuit: any) {
 		if (gameOverText) {
 			gameOverText.destroy();
 		}
-		if (button) {
-			button.destroy();
+		if (buttonAgain) {
+			buttonAgain.destroy();
+		}
+		if (buttonQuit) {
+			buttonQuit.destroy();
 		}
 		removeChestAnims(this.anims);
 		removeHeroAnims(this.anims);
@@ -147,21 +149,11 @@ export default class Game extends Phaser.Scene {
 		this.playerSlimeCollider = this.physics.add.collider(this.slimes, this.hero, this.handlePlayerSlimeCollision, undefined, this);
 	}
 
-
-
 	create() {
 		this.scene.run('game-ui');
 		this.loadLevel('dungeon');
 
 		this.scale.startFullscreen();
-
-		/* 		setTimeout(() => {
-					this.destroyLevel(undefined, undefined);
-				}, 10000)
-		
-				setTimeout(() => {
-					this.loadLevel('dungeon-2');
-				}, 14000); */
 	}
 
 	private handlePlayerChestCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
@@ -182,14 +174,20 @@ export default class Game extends Phaser.Scene {
 	};
 
 	private handlePlayerGiftCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
-		sceneEvents.emit('player-level-changed');
-		sceneEvents.emit('player-gift-changed');
-		this.destroyLevel(undefined, undefined);
-		let gameOverText = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'Загрузка уровня', { fontSize: '32px', color: '#fff', fontStyle: '700' }).setOrigin(0.5);
-		setTimeout(() => {
-			gameOverText.destroy();
-			this.loadLevel('dungeon-2');
-		}, 3000)
+		if (!this.finalLevel) {
+			sceneEvents.emit('player-level-changed');
+			sceneEvents.emit('player-gift-changed');
+			this.destroyLevel(undefined, undefined, undefined);
+			let gameOverText = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'Загрузка уровня', { fontSize: '32px', color: '#fff', fontStyle: '700' }).setOrigin(0.5);
+			setTimeout(() => {
+				gameOverText.destroy();
+				this.loadLevel('dungeon-2');
+				this.finalLevel = true;
+			}, 3000);
+		} else {
+			this.destroyLevel(undefined, undefined, undefined);
+			this.finishedGame()
+		}
 	}
 
 	private handlePlayerSlimeCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
@@ -207,26 +205,50 @@ export default class Game extends Phaser.Scene {
 
 		if (this.hero.health <= 0) {
 			this.playerSlimeCollider?.destroy();
-
+			let rt = this.add.renderTexture(0, 0, window.screen.width, this.game.scale.canvas.offsetHeight + 500);
+			rt.fill(0x000000, 0.5);
 			let gameOverText = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'GAME OVER', { fontSize: '32px', color: 'red', fontStyle: '700' }).setOrigin(0.5);
 			// Then later in one of your scenes, create a new button:
-			this.scene.pause();
-			const button = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2 + 50, 'Start Game',)
+			const buttonAgain = this.add.image(this.cameras.main.worldView.x + this.cameras.main.width / 2 - 30, this.cameras.main.worldView.y + this.cameras.main.height / 2 + 50, 'startButton')
 				.setOrigin(0.5)
-				.setPadding(10)
-				.setStyle({ backgroundColor: '#111' })
 				.setInteractive({ useHandCursor: true })
 				.on('pointerdown', () => {
-					this.destroyLevel(gameOverText, button);
+					this.destroyLevel(gameOverText, buttonAgain, buttonQuit);
 					this.loadLevel('dungeon');
-					this.scene.resume();
+					rt.destroy();
 				})
-				.on('pointerover', () => button.setStyle({ fill: '#f39c12' }))
-				.on('pointerout', () => button.setStyle({ fill: '#FFF' }));
-
+			const buttonQuit = this.add.image(this.cameras.main.worldView.x + this.cameras.main.width / 2 + 30, this.cameras.main.worldView.y + this.cameras.main.height / 2 + 50, 'quitButton')
+				.setOrigin(0.5)
+				.setInteractive({ useHandCursor: true })
+				.on('pointerdown', () => {
+					this.destroyLevel(gameOverText, buttonAgain, buttonQuit);
+					this.loadLevel('dungeon');
+					rt.destroy();
+				});
+			buttonAgain.setDepth(1);
+			buttonQuit.setDepth(1);
 		}
 	};
 
+	finishedGame() {
+		sceneEvents.emit('player-finished-game');
+		const buttonRestart = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2 - 60, this.cameras.main.worldView.y + this.cameras.main.height / 2 - 70, 'Ещё раз',)
+			.setOrigin(0.5)
+			.setPadding(10)
+			.setStyle({ backgroundColor: '#111' })
+			.setInteractive({ useHandCursor: true })
+			.on('pointerdown', () => {
+				this.scene.restart();
+			})
+		const buttonSendFinaldata = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2 + 60, this.cameras.main.worldView.y + this.cameras.main.height / 2 - 70, 'Отправить',)
+			.setOrigin(0.5)
+			.setPadding(10)
+			.setStyle({ backgroundColor: '#111' })
+			.setInteractive({ useHandCursor: true })
+			.on('pointerdown', () => {
+				console.log('sendData');
+			})
+	}
 
 	update(t: number, dt: number) {
 		if (this.hero) {

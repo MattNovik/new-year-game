@@ -142,6 +142,7 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     if (!cursors) {
+
       return;
     }
 
@@ -161,9 +162,10 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
     const speed = 100;
 
     const leftDown = cursors.left?.isDown;
-    const rightDown = cursors.right?.isDown
-    const upDown = cursors.up?.isDown
-    const downDown = cursors.down?.isDown
+    const rightDown = cursors.right?.isDown;
+    const upDown = cursors.up?.isDown;
+    const downDown = cursors.down?.isDown;
+
     if (this.anims && this.anims.currentAnim) {
       if (leftDown) {
         this.anims.play('hero-run-left', true);
