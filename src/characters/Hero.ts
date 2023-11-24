@@ -22,8 +22,7 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
   private healthState = HealthState.IDLE;
   private damageTime = 0;
 
-  private _health = 1;
-  private _coins = 0;
+  private _health = 2;
 
   private snowBalls?: Phaser.Physics.Arcade.Group
 
@@ -106,7 +105,7 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
 
     const angle = vec.angle();
 
-
+    sceneEvents.emit('hero-shoot');
     snowBall.setActive(true);
     snowBall.setVisible(true);
 
@@ -114,13 +113,28 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
 
     snowBall.x += vec.x * 16;
     snowBall.y += vec.y * 16;
-
     snowBall.setVelocity(vec.x * 300, vec.y * 300);
+
+    setTimeout(() => {
+      if (snowBall) {
+        snowBall.destroy();
+      }
+    }, 2000)
   }
 
+  shootOnMobile() {
+    if (this.activeChest) {
+      const coins = this.activeChest.open();
+
+      sceneEvents.emit('player-coins-changed', coins);
+      this.activeChest = undefined;
+    } else {
+      this.throwSnowBall();
+    }
+  }
 
   preUpdate(t: number, dt: number) {
-
+    this?.body?.setSize(this.width * 0.6, this.height * 0.6);
     super.preUpdate(t, dt);
 
     switch (this.healthState) {
@@ -143,17 +157,42 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    if (movementJoyStick.base) {
+    if (movementJoyStick && movementJoyStick.base) {
       if (movementJoyStick?.force) {
         // Calculate speed based on joystick force
         let speedMultiplier = (movementJoyStick.force < movementJoyStick.radius) ? movementJoyStick.force / movementJoyStick.radius : 1
         let speed = 100 * speedMultiplier;
 
-        // Move player according to movement joystick
-        this.setVelocityX(speed * Math.cos(Math.PI * movementJoyStick.angle / 180))
-        this.setVelocityY(speed * Math.sin(Math.PI * movementJoyStick.angle / 180))
+        const leftKeyDown = movementJoyStick.left;
+        const rightKeyDown = movementJoyStick.right;
+        const upKeyDown = movementJoyStick.up;
+        const downKeyDown = movementJoyStick.down;
+        const noKeyDown = movementJoyStick.noKey;
+
+        if (leftKeyDown) {
+          this.anims.play('hero-run-left', true);
+          this.setVelocity(-speed, 0);
+        } else if (rightKeyDown) {
+          this.anims.play('hero-run-right', true);
+          this.setVelocity(speed, 0);
+        } else if (upKeyDown) {
+          this.anims.play('hero-run-up', true);
+          this.setVelocity(0, -speed);
+        } else if (downKeyDown) {
+          this.anims.play('hero-run-bottom', true);
+          this.setVelocity(0, speed);
+        }
+
+        /*         if (leftKeyDown || rightKeyDown || upKeyDown || downKeyDown) {
+                  this.activeChest = undefined;
+                } */
       } else {
         // Stop moving
+        const parts = this.anims.currentAnim.key.split('-');
+        if (parts) {
+          parts[1] = 'idle'
+          this.anims.play(parts.join('-'));
+        }
         this.setVelocityX(0)
         this.setVelocityY(0)
       };
@@ -165,9 +204,9 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
       if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
         if (this.activeChest) {
           const coins = this.activeChest.open();
-          this._coins += coins;
 
-          sceneEvents.emit('player-coins-changed', this._coins)
+          sceneEvents.emit('player-coins-changed', coins);
+          this.activeChest = undefined;
         } else {
           this.throwSnowBall();
         }
@@ -205,9 +244,9 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
         }
 
       }
-      if (leftDown || rightDown || upDown || downDown) {
-        this.activeChest = undefined;
-      }
+      /*       if (leftDown || rightDown || upDown || downDown) {
+              this.activeChest = undefined;
+            } */
     }
   }
 }

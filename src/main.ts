@@ -6,8 +6,8 @@ import Menu from './scenes/Menu'
 
 const game = new Phaser.Game({
 	type: Phaser.AUTO,
-	width: window.innerWidth * window.devicePixelRatio,
-	height: window.innerHeight * window.devicePixelRatio,
+	width: window.innerWidth / window.devicePixelRatio,
+	height: window.innerHeight / window.devicePixelRatio,
 	dom: {
 		createContainer: true
 	},
@@ -20,24 +20,15 @@ const game = new Phaser.Game({
 	},
 	scene: [Preloader, Menu, Game, GameUI],
 	scale: {
-		mode: Phaser.Scale.ScaleModes.FIT,
+		mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
 		parent: 'phaser-id',
 		autoCenter: Phaser.Scale.CENTER_BOTH,
-		width: window.innerWidth * window.devicePixelRatio,
-		height: window.innerHeight * window.devicePixelRatio,
+		width: 800,
+		height: 400,
 	},
 	input: {
-    activePointers: 3, // 2 is default for mouse + pointer, +1 is required for dual touch
-  },
-})
-
-window.addEventListener('load', () => {
-	window.addEventListener('resize', event => {
-		game.scene.scenes[2].resizeGameContainer();
-		/* for (let i = 0; i < game.scene.scenes.length; i++) {
-			game.scene.scenes[i].resizeGameContainer();
-		} */
-	});
+		activePointers: 3, // 2 is default for mouse + pointer, +1 is required for dual touch
+	},
 });
 
 export default game;

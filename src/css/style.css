@@ -1,0 +1,60 @@
+#phaser-id {
+  background-color: #000000;
+}
+
+.email-form {
+  text-align: center;
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.email-form__hello,
+.email-form__new-year-text,
+.email-form__from,
+.email-form__play-text,
+.email-form__prises {
+  margin: 0 0 5px 0;
+}
+
+.email-form__button,
+.email-form__email {
+  font-size: 18px;
+  padding: 10px;
+  margin: 0;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  color: #000000;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+.email-form__email {
+  border: solid 1px transparent;
+  transition: border .3s ease;
+}
+
+.email-form__email.error {
+  border: solid 1px red;
+}
+
+.email-form__button {
+  background-color: #51c456;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.email-form__button::placeholder,
+.email-form__email::placeholder {
+  color: inherit;
+}
+
+.email-form__link {
+  display: block;
+  color: #000000;
+  text-decoration: none;
+  text-transform: lowercase;
+  font-size: 18px;
+  margin: 10px 0 0 0;
+}

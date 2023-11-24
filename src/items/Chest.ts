@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { sceneEvents } from '~/events/EventsCenter';
 
 export default class Chest extends Phaser.Physics.Arcade.Sprite {
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
@@ -9,10 +10,11 @@ export default class Chest extends Phaser.Physics.Arcade.Sprite {
 
 	open() {
 		if (this.anims.currentAnim.key !== 'chest-closed') {
-			return 0
+			return 0;
 		}
 
-		this.play('chest-open')
+		this.play('chest-open');
+		sceneEvents.emit('hero-open-chest');
 		return 10;
 		/* return Phaser.Math.Between(50, 200) */
 	}
