@@ -215,11 +215,23 @@ export default class Game extends Phaser.Scene {
 		this.playerSlimeCollider = this.physics.add.collider(this.slimes, this.hero, this.handlePlayerSlimeCollision, undefined, this);
 	}
 
+	checkOriention(orientation) {
+		if (orientation === Phaser.Scale.PORTRAIT) {
+			this.text.setVisible(true);
+			this.scene.pause('game');
+		}
+		else if (orientation === Phaser.Scale.LANDSCAPE) {
+			this.text.setVisible(false);
+			this.scene.resume('game');
+		}
+	}
+
 	create() {
-		/* 		if (this.sys.game.device.os.desktop) {
-				} else {
-					screen.orientation.lock("landscape");
-				}; */
+		this.text = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'Please set your\nphone to landscape', { font: '48px Courier', color: '#00ff00', align: 'center' }).setOrigin(0.5);
+
+		this.checkOriention(this.scale.orientation);
+
+		this.scale.on('orientationchange', this.checkOriention, this);
 
 		this.scene.run('game-ui');
 		this.loadLevel(`dungeon-${this.level}`);

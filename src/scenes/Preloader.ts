@@ -101,6 +101,8 @@ export default class Preloader extends Phaser.Scene {
 		this.load.audio("final_level", ["music/Fanfare_2.wav"]);
 		this.load.audio("final_game", ["music/Fanfare_1.wav"]);
 		this.load.audio("button_click", ["music/button_click.mp3"]);
+
+		this.load.image('pic', 'Others/spaceship.png');
 	}
 
 	create() {
@@ -109,6 +111,21 @@ export default class Preloader extends Phaser.Scene {
 		} else {
 			//handle your portrait case
 		} */
-		this.scene.start('menu');
+
+		this.text = this.add.text(this.cameras.main.worldView.x + this.cameras.main.width / 2, this.cameras.main.worldView.y + this.cameras.main.height / 2, 'Please set your\nphone to landscape', { font: '48px Courier', color: '#00ff00', align: 'center' }).setOrigin(0.5);
+
+		this.checkOriention(this.scale.orientation);
+
+		this.scale.on('orientationchange', this.checkOriention, this);
+	}
+
+	checkOriention(orientation) {
+		if (orientation === Phaser.Scale.PORTRAIT) {
+			this.text.setVisible(true);
+		}
+		else if (orientation === Phaser.Scale.LANDSCAPE) {
+			this.text.setVisible(false);
+			this.scene.start('menu');
+		}
 	}
 }
