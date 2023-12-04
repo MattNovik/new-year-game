@@ -112,6 +112,7 @@ export default class GameUI extends Phaser.Scene {
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('button-click', true);
 				this.pauseGame();
 			});
 
@@ -145,6 +146,7 @@ export default class GameUI extends Phaser.Scene {
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('button-click', true);
 				this.scene.resume('game');
 				this.pauseButton.setActive(true).setVisible(true);
 				buttonResume.destroy();
@@ -156,6 +158,7 @@ export default class GameUI extends Phaser.Scene {
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('button-click', true);
 				this.scene.stop('game-ui');
 				this.scene.stop('game');
 				this.scene.start('menu');
@@ -165,6 +168,7 @@ export default class GameUI extends Phaser.Scene {
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				sceneEvents.emit('button-click', true);
 				if (this.game.sound.mute === true) {
 					this.game.sound.mute = false;
 				} else {

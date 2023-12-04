@@ -31,4 +31,6 @@ const game = new Phaser.Game({
 	},
 });
 
+window.screen.orientation['lock']('landscape');
+
 export default game;

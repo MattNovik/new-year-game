@@ -231,10 +231,15 @@ export default class Game extends Phaser.Scene {
 		this.heroHit = this.sound.add("hero_hit", { loop: false, volume: 0.2 });
 		this.finalLevelMusic = this.sound.add("final_level", { loop: false, volume: 0.3 });
 		this.finalGame = this.sound.add("final_level", { loop: false, volume: 0.3 });
+		this.buttonClickMusic = this.sound.add("button_click", { loop: false, volume: 0.3 });
 		this.bgMusic.play();
 
 		sceneEvents.on('hero-shoot', () => {
 			this.throwSnowballMusic.play()
+		});
+
+		sceneEvents.on('button-click', () => {
+			this.buttonClickMusic.play()
 		});
 
 		sceneEvents.on('hero-open-chest', () => {
@@ -244,6 +249,7 @@ export default class Game extends Phaser.Scene {
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 			sceneEvents.off('hero-shoot');
 			sceneEvents.off('hero-open-chest');
+			sceneEvents.off('button-click');
 		})
 	}
 
@@ -310,6 +316,7 @@ export default class Game extends Phaser.Scene {
 				.setOrigin(0.5)
 				.setInteractive({ useHandCursor: true })
 				.on('pointerdown', () => {
+					this.buttonClickMusic.play();
 					this.destroyLevel(gameOverText, buttonAgain, buttonQuit);
 					this.loadLevel('dungeon-1');
 					sceneEvents.emit('player-gift-changed', true);
@@ -324,6 +331,7 @@ export default class Game extends Phaser.Scene {
 				.setOrigin(0.5)
 				.setInteractive({ useHandCursor: true })
 				.on('pointerdown', () => {
+					this.buttonClickMusic.play();
 					this.scene.stop('game-ui');
 					sceneEvents.emit('player-coins-changed', -1);
 					sceneEvents.emit('player-gift-changed', true);
@@ -348,6 +356,7 @@ export default class Game extends Phaser.Scene {
 			.setStyle({ backgroundColor: '#111' })
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				this.buttonClickMusic.play();
 				sceneEvents.emit('player-gift-changed', true);
 				sceneEvents.emit('player-level-changed', true);
 				sceneEvents.emit('player-coins-changed', -1);
@@ -365,6 +374,7 @@ export default class Game extends Phaser.Scene {
 			.setStyle({ backgroundColor: '#111' })
 			.setInteractive({ useHandCursor: true })
 			.on('pointerdown', () => {
+				this.buttonClickMusic.play();
 				sceneEvents.emit('player-gift-changed', true);
 				sceneEvents.emit('player-level-changed', true);
 				sceneEvents.emit('player-coins-changed', -1);

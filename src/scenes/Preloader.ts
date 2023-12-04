@@ -91,6 +91,7 @@ export default class Preloader extends Phaser.Scene {
 		this.load.image('quitButton', 'Others/quit_button.png');
 		this.load.image('background', 'bg/7976081_resized.jpg');
 		this.load.plugin('rexvirtualjoystickplugin', 'plugins/rexvirtualjoystickplugin.min.js', true);
+
 		this.load.audio("bg_music", ["music/bg_small.mp3"]);
 		this.load.audio("open_chest", ["music/open_chest.wav"]);
 		this.load.audio("game_over", ["music/Game_Over_1.wav"]);
@@ -99,6 +100,7 @@ export default class Preloader extends Phaser.Scene {
 		this.load.audio("hero_hit", ["music/to_slime_2.wav"]);
 		this.load.audio("final_level", ["music/Fanfare_2.wav"]);
 		this.load.audio("final_game", ["music/Fanfare_1.wav"]);
+		this.load.audio("button_click", ["music/button_click.mp3"]);
 	}
 
 	create() {
